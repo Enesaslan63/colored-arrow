@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Dergi Yönetimi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-orange: #FF6B35; /* Uygulamadaki ana turuncu renk */
+            --primary-green: #2ecc71;  /* Uygulamadaki ana yeşil renk */
+            --primary-blue: #3498db;
+            --primary-red: #e74c3c;
+            --text-dark: #2c3e50;
+            --text-medium: #555;
+            --text-light: #888;
+            --bg-light: #eef2f5;
+            --bg-white: #ffffff;
+        }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            display: flex; /* Flexbox kullanımı */
+            width: 100vw; /* Tam ekran genişliği */
+            height: 100vh; /* Tam ekran yüksekliği */
+            overflow-x: hidden; /* Yatay scrollbar sorunlarını önlemek için */
+        }
+        h1 {
+            color: var(--text-dark);
+            font-size: 28px;
+            margin-bottom: 30px;
+        }
+
+        .add-edergi-btn {
+            background-color: var(--primary-green);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            transition: 0.3s;
+        }
+
+        .add-edergi-btn:hover {
+            background-color: #2c8c60;
+            transform: translateY(-2px);
+        }
+
+        .container {
+            flex-grow: 1;
+            padding: 30px;
+            background-color: var(--bg-light);
+        }
+
+        .edergi-listesi {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 350px)); /* Sütun genişliğini sabitle */
+            gap: 20px;
+            max-width: 1200px; /* Maksimum genişliği sınırla */
+            margin: 0 auto; /* Ortalamak için */
+        }
+
+        .edergi-item {
+            background: var(--bg-white);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .edergi-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+        }
+
+        .edergi-image {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .edergi-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+
+        .edergi-description {
+            font-size: 1em;
+            color: var(--text-medium);
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .edergi-title[contenteditable="true"],
+        .edergi-description[contenteditable="true"] {
+            border: 1px dashed var(--primary-blue);
+            padding: 5px;
+            outline: none;
+        }
+
+        .edergi-image-upload {
+            margin-top: 10px;
+            margin-bottom: 15px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .edergi-item button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 10px;
+            transition: 0.3s;
+            flex-shrink: 0; /* Butonların sıkışmasını önle */
+        }
+
+        .edit-btn {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .save-btn {
+            background-color: var(--primary-green);
+            color: white;
+        }
+
+        .save-btn:hover {
+            background-color: #2c8c60;
+            transform: translateY(-2px);
+        }
+
+        .delete-btn {
+            background-color: var(--primary-red);
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .edergi-item.editing {
+            border: 2px solid var(--primary-blue);
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>E-Dergi Yönetimi</h1>
+        <button class="add-edergi-btn" id="addEdergiBtn">+ Yeni E-Dergi Ekle</button>
+        <div class="edergi-listesi">
+        </div>
+    </div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const edergiListesi = document.querySelector('.edergi-listesi');
+        const addEdergiBtn = document.getElementById('addEdergiBtn');
+
+        function initializeEdergiItems() {
+            let storedItems = localStorage.getItem('edergiItems');
+            if (storedItems === null) {
+                storedItems = [
+                    {
+                        id: "1",
+                        title: "E-Dergi 1",
+                        description: "E-Dergi 1 açıklaması",
+                        imageSrc: "https://via.placeholder.com/150"
+                    },
+                    {
+                        id: "2",
+                        title: "E-Dergi 2",
+                        description: "E-Dergi 2 açıklaması",
+                        imageSrc: "https://via.placeholder.com/150"
+                    },
+                    {
+                        id: "3",
+                        title: "E-Dergi 3",
+                        description: "E-Dergi 3 açıklaması",
+                        imageSrc: "https://via.placeholder.com/150"
+                    }
+                ];
+                localStorage.setItem('edergiItems', JSON.stringify(storedItems));
+            }
+        }
+
+        function loadAndRenderEdergiItems() {
+            const storedItems = JSON.parse(localStorage.getItem('edergiItems')) || [];
+            renderEdergiItems(storedItems); // Mevcut öğeleri render et
+        }
+
+        function renderEdergiItems(items) {
+            edergiListesi.innerHTML = ''; // Mevcut öğeleri temizle
+            items.forEach(itemData => {
+                const newItemHtml = `
+                    <div class="edergi-item" data-id="${itemData.id}">
+                        <img src="${itemData.imageSrc}" alt="E-Dergi Resmi" class="edergi-image">
+                        <h2 class="edergi-title" contenteditable="false">${itemData.title}</h2>
+                        <p class="edergi-description" contenteditable="false">${itemData.description}</p>
+                        <input type="file" class="edergi-image-upload" accept="image/*" style="display: none;">
+                        <button class="edit-btn">Düzenle</button>
+                        <button class="save-btn" style="display: none;">Kaydet</button>
+                        <button class="delete-btn">Sil</button>
+                    </div>
+                `;
+                edergiListesi.insertAdjacentHTML('beforeend', newItemHtml);
+            });
+        }
+
+        // Düzenleme modunu aç/kapat
+        edergiListesi.addEventListener('click', (e) => {
+            if (e.target.classList.contains('edit-btn')) {
+                const item = e.target.closest('.edergi-item');
+                const title = item.querySelector('.edergi-title');
+                const description = item.querySelector('.edergi-description');
+                const imageUpload = item.querySelector('.edergi-image-upload');
+                const editBtn = item.querySelector('.edit-btn');
+                const saveBtn = item.querySelector('.save-btn');
+
+                title.contentEditable = true;
+                description.contentEditable = true;
+                imageUpload.style.display = 'block';
+                editBtn.style.display = 'none';
+                saveBtn.style.display = 'inline-block';
+                item.classList.add('editing');
+            } else if (e.target.classList.contains('save-btn')) {
+                const item = e.target.closest('.edergi-item');
+                const id = item.dataset.id;
+                const title = item.querySelector('.edergi-title');
+                const description = item.querySelector('.edergi-description');
+                const image = item.querySelector('.edergi-image');
+                const imageUpload = item.querySelector('.edergi-image-upload');
+                const editBtn = item.querySelector('.edit-btn');
+                const saveBtn = item.querySelector('.save-btn');
+
+                title.contentEditable = false;
+                description.contentEditable = false;
+                imageUpload.style.display = 'none';
+                editBtn.style.display = 'inline-block';
+                saveBtn.style.display = 'none';
+                item.classList.remove('editing');
+
+                // Verileri localStorage'a kaydet
+                let edergiItems = JSON.parse(localStorage.getItem('edergiItems')) || [];
+                let itemIndex = edergiItems.findIndex(i => i.id === id);
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const newImageSrc = e.target.result; // Base64 formatında resim
+                    image.src = newImageSrc;
+
+                    if (itemIndex > -1) {
+                        edergiItems[itemIndex] = {
+                            id: id,
+                            title: title.textContent,
+                            description: description.textContent,
+                            imageSrc: newImageSrc
+                        };
+                    } else {
+                        edergiItems.push({
+                            id: id,
+                            title: title.textContent,
+                            description: description.textContent,
+                            imageSrc: newImageSrc
+                        });
+                    }
+                    localStorage.setItem('edergiItems', JSON.stringify(edergiItems));
+                };
+
+                if (imageUpload.files && imageUpload.files[0]) {
+                    reader.readAsDataURL(imageUpload.files[0]);
+                } else { // Resim yüklenmediyse bile diğer değişiklikleri kaydet
+                    if (itemIndex > -1) {
+                        edergiItems[itemIndex] = {
+                            id: id,
+                            title: title.textContent,
+                            description: description.textContent,
+                            imageSrc: image.src // Mevcut resim URL'ini koru
+                        };
+                    } else {
+                        edergiItems.push({
+                            id: id,
+                            title: title.textContent,
+                            description: description.textContent,
+                            imageSrc: image.src
+                        });
+                    }
+                    localStorage.setItem('edergiItems', JSON.stringify(edergiItems));
+                }
+            } else if (e.target.classList.contains('delete-btn')) {
+                const item = e.target.closest('.edergi-item');
+                const id = item.dataset.id;
+
+                if (confirm('Bu öğeyi silmek istediğinizden emin misiniz?')) {
+                    item.remove();
+                    let edergiItems = JSON.parse(localStorage.getItem('edergiItems')) || [];
+                    edergiItems = edergiItems.filter(i => i.id !== id);
+                    localStorage.setItem('edergiItems', JSON.stringify(edergiItems));
+                }
+            }
+        });
+
+        document.getElementById('addEdergiBtn').addEventListener('click', () => {
+            const newId = Date.now().toString(); // Benzersiz ID oluştur
+            
+            let edergiItems = JSON.parse(localStorage.getItem('edergiItems')) || [];
+            edergiItems.push({
+                id: newId,
+                title: "Yeni E-Dergi Başlığı",
+                description: "Yeni e-dergi açıklaması buraya gelecek.",
+                imageSrc: "https://via.placeholder.com/150"
+            });
+            localStorage.setItem('edergiItems', JSON.stringify(edergiItems));
+
+            loadAndRenderEdergiItems(); // Yeni öğeyi ekledikten sonra listeyi yeniden render et
+
+            // Yeni öğeyi düzenleme modunda başlatmak isterseniz:
+            // const newItemElement = edergiListesi.querySelector(`.edergi-item[data-id="${newId}"]`);
+            // newItemElement.querySelector('.edit-btn').click();
+        });
+
+        initializeEdergiItems(); // Sayfa yüklendiğinde varsayılan verileri başlat
+        loadAndRenderEdergiItems(); // Sayfa yüklendiğinde verileri yükle
+    });
+</script>
+</body>
+</html>

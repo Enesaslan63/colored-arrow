@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Bülten Yönetimi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-orange: #FF6B35; /* Uygulamadaki ana turuncu renk */
+            --primary-green: #2ecc71;  /* Uygulamadaki ana yeşil renk */
+            --primary-blue: #3498db;
+            --primary-red: #e74c3c;
+            --text-dark: #2c3e50;
+            --text-medium: #555;
+            --text-light: #888;
+            --bg-light: #eef2f5;
+            --bg-white: #ffffff;
+        }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            display: flex; /* Flexbox kullanımı */
+            width: 100vw; /* Tam ekran genişliği */
+            height: 100vh; /* Tam ekran yüksekliği */
+            overflow-x: hidden; /* Yatay scrollbar sorunlarını önlemek için */
+        }
+        h1 {
+            color: var(--text-dark);
+            font-size: 28px;
+            margin-bottom: 30px;
+        }
+
+        .add-ebulletin-btn {
+            background-color: var(--primary-green);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            transition: 0.3s;
+        }
+
+        .add-ebulletin-btn:hover {
+            background-color: #2c8c60;
+            transform: translateY(-2px);
+        }
+
+        .container {
+            flex-grow: 1;
+            padding: 30px;
+            background-color: var(--bg-light);
+        }
+
+        .ebulletin-listesi {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .ebulletin-item {
+            background: var(--bg-white);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .ebulletin-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+        }
+
+        .ebulletin-image {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .ebulletin-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+
+        .ebulletin-description {
+            font-size: 1em;
+            color: var(--text-medium);
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .ebulletin-title[contenteditable="true"],
+        .ebulletin-description[contenteditable="true"] {
+            border: 1px dashed var(--primary-blue);
+            padding: 5px;
+            outline: none;
+        }
+
+        .ebulletin-image-upload {
+            margin-top: 10px;
+            margin-bottom: 15px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .ebulletin-item button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 10px;
+            transition: 0.3s;
+            flex-shrink: 0; /* Butonların sıkışmasını önle */
+        }
+
+        .edit-btn {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .save-btn {
+            background-color: var(--primary-green);
+            color: white;
+        }
+
+        .save-btn:hover {
+            background-color: #2c8c60;
+            transform: translateY(-2px);
+        }
+
+        .delete-btn {
+            background-color: var(--primary-red);
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .ebulletin-item.editing {
+            border: 2px solid var(--primary-blue);
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>E-Bülten Yönetimi</h1>
+        <button class="add-ebulletin-btn" id="addEbulletinBtn">+ Yeni E-Bülten Ekle</button>
+        <div class="ebulletin-listesi">
+            <div class="ebulletin-item" data-id="1">
+                <img src="https://via.placeholder.com/150" alt="E-Bülten Resmi 1" class="ebulletin-image">
+                <h2 class="ebulletin-title" contenteditable="false">E-Bülten 1</h2>
+                <p class="ebulletin-description" contenteditable="false">E-Bülten 1 açıklaması</p>
+                <input type="file" class="ebulletin-image-upload" accept="image/*" style="display: none;">
+                <button class="edit-btn">Düzenle</button>
+                <button class="save-btn" style="display: none;">Kaydet</button>
+                <button class="delete-btn">Sil</button>
+            </div>
+            <div class="ebulletin-item" data-id="2">
+                <img src="https://via.placeholder.com/150" alt="E-Bülten Resmi 2" class="ebulletin-image">
+                <h2 class="ebulletin-title" contenteditable="false">E-Bülten 2</h2>
+                <p class="ebulletin-description" contenteditable="false">E-Bülten 2 açıklaması</p>
+                <input type="file" class="ebulletin-image-upload" accept="image/*" style="display: none;">
+                <button class="edit-btn">Düzenle</button>
+                <button class="save-btn" style="display: none;">Kaydet</button>
+                <button class="delete-btn">Sil</button>
+            </div>
+            <div class="ebulletin-item" data-id="3">
+                <img src="https://via.placeholder.com/150" alt="E-Bülten Resmi 3" class="ebulletin-image">
+                <h2 class="ebulletin-title" contenteditable="false">E-Bülten 3</h2>
+                <p class="ebulletin-description" contenteditable="false">E-Bülten 3 açıklaması</p>
+                <input type="file" class="ebulletin-image-upload" accept="image/*" style="display: none;">
+                <button class="edit-btn">Düzenle</button>
+                <button class="save-btn" style="display: none;">Kaydet</button>
+                <button class="delete-btn">Sil</button>
+            </div>
+        </div>
+    </div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const ebulletinListesi = document.querySelector('.ebulletin-listesi');
+        const addEbulletinBtn = document.getElementById('addEbulletinBtn');
+
+        // localStorage'dan verileri yükle
+        function loadEbulletinItems() {
+            const storedItems = JSON.parse(localStorage.getItem('ebulletinItems')) || [];
+            storedItems.forEach(itemData => {
+                const itemElement = ebulletinListesi.querySelector(`.ebulletin-item[data-id="${itemData.id}"]`);
+                if (itemElement) {
+                    itemElement.querySelector('.ebulletin-image').src = itemData.imageSrc;
+                    itemElement.querySelector('.ebulletin-title').textContent = itemData.title;
+                    itemElement.querySelector('.ebulletin-description').textContent = itemData.description;
+                }
+            });
+        }
+
+        // Düzenleme modunu aç/kapat
+        ebulletinListesi.addEventListener('click', (e) => {
+            if (e.target.classList.contains('edit-btn')) {
+                const item = e.target.closest('.ebulletin-item');
+                const title = item.querySelector('.ebulletin-title');
+                const description = item.querySelector('.ebulletin-description');
+                const imageUpload = item.querySelector('.ebulletin-image-upload');
+                const editBtn = item.querySelector('.edit-btn');
+                const saveBtn = item.querySelector('.save-btn');
+
+                title.contentEditable = true;
+                description.contentEditable = true;
+                imageUpload.style.display = 'block';
+                editBtn.style.display = 'none';
+                saveBtn.style.display = 'inline-block';
+                item.classList.add('editing');
+            } else if (e.target.classList.contains('save-btn')) {
+                const item = e.target.closest('.ebulletin-item');
+                const id = item.dataset.id;
+                const title = item.querySelector('.ebulletin-title');
+                const description = item.querySelector('.ebulletin-description');
+                const image = item.querySelector('.ebulletin-image');
+                const imageUpload = item.querySelector('.ebulletin-image-upload');
+                const editBtn = item.querySelector('.edit-btn');
+                const saveBtn = item.querySelector('.save-btn');
+
+                title.contentEditable = false;
+                description.contentEditable = false;
+                imageUpload.style.display = 'none';
+                editBtn.style.display = 'inline-block';
+                saveBtn.style.display = 'none';
+                item.classList.remove('editing');
+
+                // Verileri localStorage'a kaydet
+                let ebulletinItems = JSON.parse(localStorage.getItem('ebulletinItems')) || [];
+                let itemIndex = ebulletinItems.findIndex(i => i.id === id);
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const newImageSrc = e.target.result; // Base64 formatında resim
+                    image.src = newImageSrc;
+
+                    if (itemIndex > -1) {
+                        ebulletinItems[itemIndex] = {
+                            id: id,
+                            title: title.textContent,
+                            description: description.textContent,
+                            imageSrc: newImageSrc
+                        };
+                    } else {
+                        ebulletinItems.push({
+                            id: id,
+                            title: title.textContent,
+                            description: description.textContent,
+                            imageSrc: newImageSrc
+                        });
+                    }
+                    localStorage.setItem('ebulletinItems', JSON.stringify(ebulletinItems));
+                };
+
+                if (imageUpload.files && imageUpload.files[0]) {
+                    reader.readAsDataURL(imageUpload.files[0]);
+                } else { // Resim yüklenmediyse bile diğer değişiklikleri kaydet
+                    if (itemIndex > -1) {
+                        ebulletinItems[itemIndex] = {
+                            id: id,
+                            title: title.textContent,
+                            description: description.textContent,
+                            imageSrc: image.src // Mevcut resim URL'ini koru
+                        };
+                    } else {
+                        ebulletinItems.push({
+                            id: id,
+                            title: title.textContent,
+                            description: description.textContent,
+                            imageSrc: image.src
+                        });
+                    }
+                    localStorage.setItem('ebulletinItems', JSON.stringify(ebulletinItems));
+                }
+            } else if (e.target.classList.contains('delete-btn')) {
+                const item = e.target.closest('.ebulletin-item');
+                const id = item.dataset.id;
+
+                if (confirm('Bu öğeyi silmek istediğinizden emin misiniz?')) {
+                    item.remove();
+                    let ebulletinItems = JSON.parse(localStorage.getItem('ebulletinItems')) || [];
+                    ebulletinItems = ebulletinItems.filter(i => i.id !== id);
+                    localStorage.setItem('ebulletinItems', JSON.stringify(ebulletinItems));
+                }
+            }
+        });
+
+        document.getElementById('addEbulletinBtn').addEventListener('click', () => {
+            const newId = Date.now().toString(); // Benzersiz ID oluştur
+            const newItemHtml = `
+                <div class="ebulletin-item" data-id="${newId}">
+                    <img src="https://via.placeholder.com/150" alt="Yeni E-Bülten Resmi" class="ebulletin-image">
+                    <h2 class="ebulletin-title" contenteditable="false">Yeni E-Bülten Başlığı</h2>
+                    <p class="ebulletin-description" contenteditable="false">Yeni e-bülten açıklaması buraya gelecek.</p>
+                    <input type="file" class="ebulletin-image-upload" accept="image/*" style="display: none;">
+                    <button class="edit-btn">Düzenle</button>
+                    <button class="save-btn" style="display: none;">Kaydet</button>
+                    <button class="delete-btn">Sil</button>
+                </div>
+            `;
+            ebulletinListesi.insertAdjacentHTML('beforeend', newItemHtml);
+
+            // Yeni eklenen öğeyi localStorage'a kaydet
+            let ebulletinItems = JSON.parse(localStorage.getItem('ebulletinItems')) || [];
+            ebulletinItems.push({
+                id: newId,
+                title: "Yeni E-Bülten Başlığı",
+                description: "Yeni e-bülten açıklaması buraya gelecek.",
+                imageSrc: "https://via.placeholder.com/150"
+            });
+            localStorage.setItem('ebulletinItems', JSON.stringify(ebulletinItems));
+
+            // Yeni öğeyi düzenleme modunda başlatmak isterseniz:
+            // const newItemElement = ebulletinListesi.querySelector(`.ebulletin-item[data-id="${newId}"]`);
+            // newItemElement.querySelector('.edit-btn').click();
+        });
+
+        loadEbulletinItems(); // Sayfa yüklendiğinde verileri yükle
+    });
+</script>
+</body>
+</html>

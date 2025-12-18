@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yönetim Paneli</title>
+    
+    <style>
+        html {
+            width: 100%;
+            overflow-x: hidden;
+        }
+        :root {
+            --primary-orange: #FF6B35; /* Uygulamadaki ana turuncu renk */
+            --primary-green: #2ecc71;  /* Uygulamadaki ana yeşil renk */
+            --primary-blue: #3498db;
+            --primary-red: #e74c3c;
+            --text-dark: #2c3e50;
+            --text-medium: #555;
+            --text-light: #888;
+            --bg-light: #eef2f5;
+            --bg-white: #ffffff;
+        }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            display: flex; /* Flexbox kullanımı */
+            width: 100vw; /* Tam ekran genişliği */
+            max-width: 100vw; /* Sayfanın maksimum genişliğini belirle */
+            height: 100vh; /* Tam ekran yüksekliği */
+            overflow-x: hidden; /* Yatay kaydırma çubuğunu gizle */
+            box-sizing: border-box; /* Tüm elementler için kutu modelini standartlaştır */
+        }
+
+        .login-container {
+            max-width: 450px;
+            width: 100%;
+            background: var(--bg-white);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            margin: auto; /* Ortalamak için */
+        }
+
+        .wrapper {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            min-width: 0; /* Flex öğelerinin taşmasını önlemek için */
+        }
+
+        .header {
+            background-color: var(--bg-white);
+            padding: 15px 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-medium);
+            border-bottom: 1px solid #eee;
+            position: sticky; /* Sabit başlık için */
+            top: 0;
+            z-index: 100;
+            width: 100%; 
+            box-sizing: border-box; /* Kutu modelini standartlaştır */
+        }
+
+        .header .left-section {
+            display: flex;
+            align-items: center;
+            flex-grow: 1; /* Mevcut tüm alanı kaplamasını sağla */
+        }
+
+        .header .logo {
+            font-weight: 700;
+            font-size: 20px;
+            color: var(--text-dark);
+            margin-right: 20px;
+        }
+
+        .header .menu-toggle {
+            background: none;
+            border: none;
+            font-size: 30px;
+            cursor: pointer;
+            color: var(--text-medium);
+        }
+
+        .header .right-section {
+            display: flex;
+            gap: 20px; /* Boşluk için gap kullan */
+            align-items: center; /* İkonları dikeyde hizala */
+        }
+
+        .header .right-section a {
+            /* margin-left: 20px; */ /* Artık buna gerek yok */
+            color: var(--text-medium);
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+            transition: width 0.3s ease;
+            height: 100%; /* Tam yükseklik */
+            overflow-y: auto; /* Kaydırma çubuğu */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar.collapsed {
+            width: 60px;
+        }
+
+        .sidebar.collapsed .sidebar-header {
+            justify-content: center; /* İkonu ortalamak için */
+            padding: 15px 0;
+        }
+
+        .sidebar.collapsed .sidebar-header .menu-toggle {
+            margin-top: 10px; /* Metin ile ikon arasına boşluk */
+        }
+
+        .sidebar.collapsed .sidebar-header .logo-text {
+            display: block; 
+            top: 10px; 
+            width: 100%; 
+            text-align: center; 
+            font-size: 0.8em; 
+            padding: 0 5px; 
+        }
+
+        .sidebar.collapsed .menu-item span {
+            display: none;
+        }
+
+        .sidebar.collapsed .menu-item {
+            justify-content: center; /* İkonları ortalamak için */
+            padding: 12px 0;
+        }
+
+        .sidebar.collapsed .menu-item i {
+            margin-right: 0;
+        }
+
+        .sidebar-header {
+            display: flex;
+            flex-direction: column; /* Her zaman dikey sırala */
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid #34495e;
+            color: #fff;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .sidebar-header .logo-text {
+            margin-bottom: 10px; /* İkon ile arasına boşluk */
+            margin-left: 0; /* Ortalamak için kaldır */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-grow: 0; /* Esnemeyi kapat */
+            text-align: center; /* Metni ortala */
+            width: 100%; /* Tam genişlik */
+        }
+
+        .sidebar .menu-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .sidebar .menu-item:hover {
+            background-color: #34495e;
+        }
+
+        .sidebar .menu-item.active {
+            background-color: var(--primary-green); /* Uygulama yeşili */
+            font-weight: bold;
+        }
+
+        .sidebar .menu-item i {
+            margin-right: 15px;
+            font-size: 18px;
+        }
+
+        .sidebar .menu-item span {
+            flex-grow: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            flex-shrink: 1; /* Gerektiğinde küçülmesine izin ver */
+            flex-basis: 0; /* Mevcut alanı doldurmasını sağla */
+            min-width: 0; /* İçeriği taşsa bile küçülmesine izin ver */
+            display: flex;
+            flex-direction: column; /* İçeriğin dikey olarak sıralanması */
+            overflow-y: auto; /* Ana içerik alanında kaydırma */
+            background-color: var(--bg-light);
+        }
+
+        .content-area {
+            padding: 30px;
+            flex-grow: 1;
+            box-sizing: border-box; /* İçerik alanı için kutu modelini standartlaştır */
+            max-width: 100%; /* İçerik alanının maksimum genişliği */
+            overflow-x: hidden; /* İçerik alanında yatay kaydırmayı engelle */
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .dashboard-header h1 {
+            margin: 0;
+            color: var(--text-dark);
+            font-size: 28px;
+        }
+
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Minimum kart genişliğini azalt, daha duyarlı */
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .info-card {
+            background: var(--bg-white);
+            padding: 25px;
+            border-radius: 15px; /* Daha yuvarlak köşeler */
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08); /* Daha belirgin gölge */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 150px; /* Min yükseklik */
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+        }
+
+        .info-card .number {
+            font-size: 44px; /* Daha büyük sayı */
+            font-weight: 700;
+            color: var(--primary-green); /* Varsayılan olarak uygulama yeşili */
+        }
+
+        .info-card .title {
+            font-size: 1.2em; /* Daha büyük başlık */
+            font-weight: 600;
+            color: var(--text-medium);
+            margin-top: 10px;
+        }
+
+        .info-card .link {
+            margin-top: 15px;
+            font-size: 1em; /* Daha büyük bağlantı metni */
+            color: var(--primary-green); /* Varsayılan olarak uygulama yeşili */
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .info-card .link i {
+            margin-left: 8px; /* İkon ile metin arasına daha fazla boşluk */
+            font-size: 0.9em;
+        }
+
+        /* Renkler için özel sınıflar */
+        .info-card.blue .number, .info-card.blue .link { color: var(--primary-blue); }
+        .info-card.green .number, .info-card.green .link { color: var(--primary-green); }
+        .info-card.orange .number, .info-card.orange .link { color: var(--primary-orange); }
+        .info-card.red .number, .info-card.red .link { color: var(--primary-red); }
+
+        .e-bulletin {
+            background: var(--bg-white);
+            padding: 25px;
+            border-radius: 15px; /* Daha yuvarlak köşeler */
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        }
+
+        .e-bulletin h3 {
+            margin-top: 0;
+            color: var(--text-dark);
+            font-size: 22px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .e-bulletin-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0; /* Daha fazla dikey boşluk */
+            border-bottom: 1px dashed #eee;
+        }
+
+        .e-bulletin-item:last-child {
+            border-bottom: none;
+        }
+
+        .e-bulletin-item .icon {
+            width: 48px; /* İkon boyutunu biraz daha büyütme */
+            height: 48px;
+            background-color: var(--bg-light);
+            border-radius: 10px; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px; /* İkon boyutunu büyütme */
+            color: var(--text-medium);
+            margin-right: 18px; /* Daha fazla boşluk */
+        }
+
+        .e-bulletin-item .details span {
+            display: block;
+            font-size: 1em; /* Metin boyutunu artırma */
+        }
+
+        .e-bulletin-item .details .date {
+            color: var(--text-light);
+            margin-bottom: 5px; /* Daha fazla boşluk */
+        }
+
+        .e-bulletin-item .details .email {
+            color: var(--text-dark);
+            font-weight: 500;
+            font-size: 1.05em; /* E-posta metnini biraz daha büyük yapma */
+        }
+        
+        /* Mevcut giriş formu ve içerik yükleyici stilleri */
+        label { display: block; margin-top: 15px; font-weight: 600; font-size: 0.9em; margin-bottom: 5px; color: var(--text-medium); }
+        input[type="text"], input[type="password"], textarea { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; box-sizing: border-box; transition: 0.3s; font-size: 1em; }
+        input:focus, textarea:focus { border-color: var(--primary-green); outline: none; }
+        .file-upload { border: 2px dashed #ccc; padding: 20px; text-align: center; border-radius: 8px; margin-top: 10px; cursor: pointer; color: var(--text-medium); }
+        .file-upload:hover { background-color: #fafafa; border-color: var(--primary-green); }
+        button { width: 100%; padding: 14px; background-color: var(--primary-green); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 25px; transition: 0.3s; }
+        button:hover { background-color: #2c8c60; transform: translateY(-2px); }
+        button:disabled { background-color: #95a5a6; transform: none; cursor: not-allowed; }
+        #durum { margin-top: 15px; text-align: center; font-size: 0.9em; color: var(--text-medium); }
+
+    </style>
+    <!-- FontAwesome ikonları için CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+<div class="login-container" id="loginContainer">
+    <h2>🔑 Yönetici Girişi</h2>
+    <label for="username">Kullanıcı Adı</label>
+    <input type="text" id="username" placeholder="Kullanıcı Adı">
+    <label for="password">Şifre</label>
+    <input type="password" id="password" placeholder="Şifre">
+    <button onclick="girisYap()">Giriş Yap</button>
+    <div id="loginDurum" style="margin-top: 15px; text-align: center; font-size: 0.9em;"></div>
+</div>
+
+<div class="wrapper" id="adminWrapper" style="display: none;">
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <span class="logo-text">Yönetici Paneli</span> <!-- Metni yukarı taşıdım -->
+            <button class="menu-toggle" onclick="toggleSidebar()" aria-label="Menüyü Aç/Kapat"><i class="fas fa-bars"></i></button>
+        </div>
+        <div class="menu-list">
+            <div class="menu-item active"><i class="fas fa-home"></i> <span>Anasayfa</span></div>
+            <div class="menu-item"><i class="fas fa-camera"></i> <span>Galeri Yönetimi</span></div>
+            <div class="menu-item" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span>Oturumu Kapat</span></div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <div class="left-section">
+                <!-- Logo ve menü toggle buraya taşındı, üst menüdeki toggle kaldırıldı -->
+                <span class="logo"></span>
+            </div>
+            <div class="right-section">
+                <a href="#"><i class="fas fa-envelope"></i></a>
+                <a href="#"><i class="fas fa-cog"></i></a>
+            </div>
+        </div>
+
+        <div class="content-area">
+            <div class="dashboard-header">
+                <h1>Gençlik Meclisi <small style="font-weight: normal; color: var(--text-light); font-size: 0.7em;">Hoşgeldin</small></h1>
+            </div>
+
+            <div class="info-cards">
+
+                <!-- Sayfa Yönetimi Kartı -->
+                <div class="info-card green" onClick="window.location.href='indirim.html'">
+                    <div class="number" id="indirimSayisi"></div>
+                    <div class="title">indirimler</div>
+                    <a href="indirim.html" class="link">indirimleri yönet <i class="fas fa-arrow-right"></i></a>
+                </div>
+
+                <!-- Haber Yönetimi Kartı -->
+                <div class="info-card red" onClick="window.location.href='etkinlikler.html'">
+                    <div class="number" id="etkinlikSayisi"></div>
+                    <div class="title">Etkinlikler</div>
+                    <a href="etkinlikler.html" class="link">Etkinlikleri yönet <i class="fas fa-arrow-right"></i></a>
+                </div>
+
+
+                <!-- Galeri Yönetimi Kartı -->
+                <div class="info-card green" onclick="window.location.href='kesfet.html'">
+                    <div class="number" id="kesfetSayisi"></div>
+                    <div class="title">Keşfet</div>
+                    <a href="kesfet.html" class="link">Keşfetleri yönet <i class="fas fa-arrow-right"></i></a>
+                </div>
+
+                <!-- Slider Yönetimi Kartı -->
+                <div class="info-card blue" onClick="window.location.href='e-bulten.html'">
+                    <div class="number" id="ebultenSayisi"></div>
+                    <div class="title">E-Bülten</div>
+                    <a href="e-bulten.html" class="link">E-Bülteni yönet <i class="fas fa-arrow-right"></i></a>
+                </div>
+
+                <!-- Mesaj Yönetimi Kartı -->
+                <div class="info-card green" onClick="window.location.href='e-dergi.html'">
+                    <div class="number" id="edergiSayisi"></div>
+                    <div class="title">E-Dergi</div>
+                    <a href="e-dergi.html" class="link">E-Dergiyi yönet <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="e-bulletin" style="margin-top: 30px;">
+                <h3>Yeni Etkinlik Ekle</h3>
+                <div style="margin-bottom: 20px;">
+                    <img src="https://via.placeholder.com/400x200" alt="Etkinlik Resmi" id="etkinlikResimPreview" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 15px;">
+                    <label for="etkinlikResimInput" class="file-upload">
+                        <span>Dosya Seç</span>
+                        <input type="file" id="etkinlikResimInput" accept="image/*" style="display: none;">
+                    </label>
+                    <span id="etkinlikSecilenDosyaAdi">Seçilen dosya yok</span>
+                </div>
+                <label for="etkinlikBaslik">Yeni Etkinlik Başlığı</label>
+                <input type="text" id="etkinlikBaslik" placeholder="Yeni Etkinlik Başlığı">
+
+                <label for="etkinlikAciklama">Yeni Etkinlik Açıklaması</label>
+                <textarea id="etkinlikAciklama" placeholder="Yeni etkinlik açıklaması buraya gelecek." rows="4"></textarea>
+
+                <label for="etkinlikTarih">Tarih</label>
+                <input type="date" id="etkinlikTarih" placeholder="gg.aa.yyyy">
+
+                <label for="etkinlikSaat">Saat</label>
+                <input type="time" id="etkinlikSaat" placeholder="--:--">
+
+                <label for="etkinlikKonum">Yeni Konum</label>
+                <input type="text" id="etkinlikKonum" placeholder="Yeni Konum">
+
+                <label for="etkinlikKategori">Kategori</label>
+                <select id="etkinlikKategori">
+                    <option value="Konser">Konser</option>
+                    <option value="Tiyatro">Tiyatro</option>
+                    <option value="Sergi">Sergi</option>
+                    <option value="Seminer">Seminer</option>
+                    <option value="Atölye">Atölye</option>
+                </select>
+
+                <button onclick="etkinlikKaydet()" id="etkinlikKaydetBtn">Kaydet</button>
+                <button style="background-color: var(--primary-red);" onclick="etkinlikSil()">Sil</button>
+                <div id="etkinlikDurum" style="margin-top: 15px; text-align: center; font-size: 0.9em;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const SUPABASE_URL = 'https://taljkterwvuwmazbkram.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRhbGprdGVyd3Z1d21hemJrcmFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYwNDI5MjQsImV4cCI6MjA4MTYxODkyNH0.I9JkJN5bOfaDqsmdNMgXotXqPGfK6OB1zQ5SMk-8epI';
+    var supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    function checkLoginStatus() {
+        const isLoggedIn = localStorage.getItem('adminLoggedIn');
+        const loginContainer = document.getElementById('loginContainer');
+        const adminWrapper = document.getElementById('adminWrapper');
+
+        if (isLoggedIn === 'true') {
+            loginContainer.style.display = 'none';
+            adminWrapper.style.display = 'flex';
+        } else {
+            loginContainer.style.display = 'block';
+            adminWrapper.style.display = 'none';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        checkLoginStatus();
+        updateCardCounts(); // Sayfa yüklendiğinde tüm kart sayılarını güncelle
+    });
+
+    async function updateCardCounts() {
+        const storedEtkinlikler = JSON.parse(localStorage.getItem('etkinliklerItems')) || [];
+        const etkinlikSayisi = storedEtkinlikler.length;
+        const etkinlikSayisiElement = document.getElementById('etkinlikSayisi');
+        if (etkinlikSayisiElement) {
+            etkinlikSayisiElement.innerText = etkinlikSayisi;
+        }
+
+
+        const storedIndirimler = JSON.parse(localStorage.getItem('indirimItems')) || [];
+        const indirimSayisi = storedIndirimler.length;
+        const indirimSayisiElement = document.getElementById('indirimSayisi');
+        if (indirimSayisiElement) {
+            indirimSayisiElement.innerText = indirimSayisi;
+        }
+
+        const storedKesfet = JSON.parse(localStorage.getItem('kesfetItems')) || [];
+        const kesfetSayisi = storedKesfet.length;
+        const kesfetSayisiElement = document.getElementById('kesfetSayisi');
+        if (kesfetSayisiElement) {
+            kesfetSayisiElement.innerText = kesfetSayisi;
+        }
+
+        const storedEbulten = JSON.parse(localStorage.getItem('eBultenItems')) || [];
+        const ebultenSayisi = storedEbulten.length;
+        const ebultenSayisiElement = document.getElementById('ebultenSayisi');
+        if (ebultenSayisiElement) {
+            ebultenSayisiElement.innerText = ebultenSayisi;
+        }
+
+        const storedEdergi = JSON.parse(localStorage.getItem('edergiItems')) || [];
+        const edergiSayisi = storedEdergi.length;
+        const edergiSayisiElement = document.getElementById('edergiSayisi');
+        if (edergiSayisiElement) {
+            edergiSayisiElement.innerText = edergiSayisi;
+        }
+    }
+
+    async function girisYap() {
+        // Geçici kullanıcı adı ve şifre
+        const dogruKullaniciAdi = "admin";
+        const dogruSifre = "123456";
+
+        const kullaniciAdiInput = document.getElementById('username').value;
+        const sifreInput = document.getElementById('password').value;
+        const loginDurum = document.getElementById('loginDurum');
+        const loginContainer = document.getElementById('loginContainer');
+        const adminWrapper = document.getElementById('adminWrapper');
+
+        console.log("Girilen Kullanıcı Adı:", kullaniciAdiInput);
+        console.log("Girilen Şifre:", sifreInput);
+        console.log("Beklenen Kullanıcı Adı:", dogruKullaniciAdi);
+        console.log("Beklenen Şifre:", dogruSifre);
+
+        if (kullaniciAdiInput === dogruKullaniciAdi && sifreInput === dogruSifre) {
+            loginDurum.innerHTML = "✅ Başarılı! Yönlendiriliyorsunuz...";
+            loginDurum.style.color = "green";
+            localStorage.setItem('adminLoggedIn', 'true'); // Giriş durumunu kaydet
+            loginContainer.style.display = 'none';
+            adminWrapper.style.display = 'flex';
+        } else {
+            loginDurum.innerHTML = "❌ Hatalı kullanıcı adı veya şifre.";
+            loginDurum.style.color = "red";
+        }
+    }
+
+    function logout() {
+        localStorage.removeItem('adminLoggedIn'); // Giriş durumunu temizle
+        document.getElementById('adminWrapper').style.display = 'none';
+        document.getElementById('loginContainer').style.display = 'block';
+        document.getElementById('username').value = '';
+        document.getElementById('password').value = '';
+        document.getElementById('loginDurum').innerHTML = '';
+    }
+
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('collapsed');
+    }
+
+    async function yukle() {
+        document.getElementById('durum').innerHTML = "Bu işlev artık kullanılmıyor. Lütfen etkinlik ekleme formunu kullanın.";
+        document.getElementById('durum').style.color = "red";
+    }
+
+    async function etkinlikKaydet() {
+        const baslik = document.getElementById('etkinlikBaslik').value;
+        const aciklama = document.getElementById('etkinlikAciklama').value;
+        const tarih = document.getElementById('etkinlikTarih').value;
+        const saat = document.getElementById('etkinlikSaat').value;
+        const konum = document.getElementById('etkinlikKonum').value;
+        const kategori = document.getElementById('etkinlikKategori').value;
+        const dosyaInput = document.getElementById('etkinlikResimInput');
+        const dosya = dosyaInput.files[0];
+        const btn = document.getElementById('etkinlikKaydetBtn');
+        const durum = document.getElementById('etkinlikDurum');
+
+        if (!baslik || !aciklama || !tarih || !saat || !konum || !kategori || !dosya) {
+            durum.innerHTML = "Tüm alanlar ve resim zorunludur!";
+            durum.style.color = "red";
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerText = "Kaydediliyor...";
+        durum.innerHTML = "⏳ Resim yükleniyor...";
+        durum.style.color = "var(--text-medium)";
+
+        try {
+            // 1. Supabase Storage'a resmi yükle
+            const filePath = `${Date.now()}_${dosya.name}`;
+            const { data: uploadData, error: uploadError } = await supabase.storage
+                .from('etkinlik_resimleri') // Supabase Storage'da bir 'etkinlik_resimleri' kovası oluşturmanız gerekmektedir.
+                .upload(filePath, dosya);
+
+            if (uploadError) {
+                throw uploadError;
+            }
+
+            const publicUrl = supabase.storage.from('etkinlik_resimleri').getPublicUrl(filePath).data.publicUrl;
+
+            durum.innerHTML = "⏳ Veritabanına kaydediliyor...";
+
+            // 2. Resim URL'sini ve diğer verileri Supabase veritabanına kaydet
+            const { data, error: insertError } = await supabase
+                .from('etkinlikler') // Kaydedilecek tabloyu buraya yazın (örneğin 'etkinlikler')
+                .insert([
+                    { baslik: baslik, aciklama: aciklama, tarih: tarih, saat: saat, konum: konum, kategori: kategori, resim_url: publicUrl }
+                ]);
+
+            if (insertError) {
+                throw insertError;
+            }
+
+            durum.innerHTML = "✅ Başarıyla yüklendi ve kaydedildi!";
+            durum.style.color = "green";
+            // Formu temizle
+            document.getElementById('etkinlikBaslik').value = '';
+            document.getElementById('etkinlikAciklama').value = '';
+            document.getElementById('etkinlikTarih').value = '';
+            document.getElementById('etkinlikSaat').value = '';
+            document.getElementById('etkinlikKonum').value = '';
+            document.getElementById('etkinlikKategori').value = 'Konser'; // Varsayılan değere sıfırla
+            dosyaInput.value = ''; // Dosya inputunu temizle
+            document.getElementById('etkinlikSecilenDosyaAdi').innerText = 'Seçilen dosya yok';
+            document.getElementById('etkinlikResimPreview').src = 'https://via.placeholder.com/400x200';
+
+            updateCardCounts(); // Kart sayılarını güncelle (eğer Etkinlikler kartı varsa)
+
+        } catch (err) {
+            console.error("Yükleme hatası:", err.message);
+            durum.innerHTML = `❌ Hata: ${err.message}`;
+            durum.style.color = "red";
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "Kaydet";
+        }
+    }
+
+    function etkinlikSil() {
+        // Silme işlevi şimdilik pasif
+        document.getElementById('etkinlikDurum').innerHTML = "Silme işlevi henüz aktif değil.";
+        document.getElementById('etkinlikDurum').style.color = "orange";
+    }
+
+    document.getElementById('etkinlikResimInput').addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            document.getElementById('etkinlikSecilenDosyaAdi').innerText = file.name;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('etkinlikResimPreview').src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            document.getElementById('etkinlikSecilenDosyaAdi').innerText = 'Seçilen dosya yok';
+            document.getElementById('etkinlikResimPreview').src = 'https://via.placeholder.com/400x200';
+        }
+    });
+</script>
+</body>
+</html>
